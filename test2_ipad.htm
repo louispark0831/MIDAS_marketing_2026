@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<title>MIDAS Civil NX - Engineering Journey</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+
+:root {
+  --primary: #0055FF;
+  --primary-hover: #0044CC;
+  --primary-light: #EBF4FF;
+  --con: #E06C00;
+  --con-hover: #C25E00;
+  --con-light: #FFF4E5;
+  
+  --bg: #F8FAFC;
+  --surface: #FFFFFF;
+  --text-main: #0F172A;
+  --text-muted: #64748B;
+  --border: #E2E8F0;
+  
+  --radius-xl: 24px;
+  --radius-lg: 16px;
+  --radius-md: 8px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+  --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: 'Inter', sans-serif; color: var(--text-main); -webkit-font-smoothing: antialiased; }
+
+/* ── SCREENS ── */
+.screen { position: absolute; inset: 0; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); transform: scale(0.98); }
+.screen.active { opacity: 1; pointer-events: all; transform: scale(1); }
+
+/* ── HOME: PERSONA SELECTION ── */
+.home-container { display: flex; flex-direction: column; height: 100%; align-items: center; justify-content: center; padding: 40px; background: radial-gradient(circle at 50% 0%, #FFFFFF 0%, #F1F5F9 100%); }
+.home-brand { position: absolute; top: 40px; left: 40px; display: flex; align-items: center; gap: 12px; }
+.home-brand img { height: 32px; }
+.home-title { text-align: center; margin-bottom: 60px; }
+.home-title h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 48px; font-weight: 800; letter-spacing: -1px; margin-bottom: 16px; }
+.home-title p { font-size: 20px; color: var(--text-muted); max-width: 600px; margin: 0 auto; }
+
+.persona-grid { display: flex; gap: 32px; width: 100%; max-width: 1000px; }
+.persona-card { flex: 1; background: var(--surface); border-radius: var(--radius-xl); padding: 40px; border: 2px solid transparent; box-shadow: var(--shadow-md); cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.persona-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.persona-card.eng:hover { border-color: var(--primary); }
+.persona-card.con:hover { border-color: var(--con); }
+.p-icon { width: 100px; height: 100px; border-radius: 24px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; }
+.eng .p-icon { background: var(--primary-light); color: var(--primary); }
+.con .p-icon { background: var(--con-light); color: var(--con); }
+.p-icon svg { width: 48px; height: 48px; }
+.persona-card h2 { font-size: 28px; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.5px;}
+.persona-card p { font-size: 16px; color: var(--text-muted); line-height: 1.5; }
+
+/* ── JOURNEY LAYOUT (Master-Detail) ── */
+.journey-layout { display: flex; height: 100%; width: 100%; }
+
+/* Left Sidebar (Timeline) */
+.sidebar { width: 320px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 40px 0; z-index: 10; overflow-y: auto; flex-shrink: 0; }
+.back-btn { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; color: var(--text-muted); cursor: pointer; padding: 0 32px; margin-bottom: 40px; transition: 0.2s; }
+.back-btn:hover { color: var(--text-main); }
+.back-btn svg { width: 18px; height: 18px; }
+
+.timeline { display: flex; flex-direction: column; position: relative; padding: 0 32px; gap: 32px; }
+.timeline::before { content: ''; position: absolute; left: 45.5px; top: 10px; bottom: 10px; width: 1px; background: var(--border); z-index: 0; }
+
+.step { position: relative; display: flex; align-items: center; gap: 16px; cursor: pointer; z-index: 1; group; }
+.step-dot { width: 28px; height: 28px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; transition: 0.3s; flex-shrink: 0; }
+.step.active.eng-step .step-dot { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-light); }
+.step.active.con-step .step-dot { background: var(--con); border-color: var(--con); box-shadow: 0 0 0 4px var(--con-light); }
+.step-label { font-size: 16px; font-weight: 600; color: var(--text-muted); transition: 0.3s; }
+.step.active .step-label { color: var(--text-main); font-weight: 700; }
+.step:hover .step-label { color: var(--text-main); }
+
+/* Right Content Area */
+.content-area { flex: 1; overflow-y: auto; background: var(--bg); display: flex; flex-direction: column; }
+.topic-section { display: none; width: 100%; animation: fadeIn 0.3s ease; }
+.topic-section.active { display: block; }
+
+/* Hook Banner (Screenshot 1 Style) */
+.hook-banner { padding: 48px 48px 32px; }
+.hook-pills { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+.pill { padding: 8px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; font-size: 15px; font-weight: 700; box-shadow: var(--shadow-sm); }
+.eng-page .pill { color: var(--primary); }
+.con-page .pill { color: var(--con); }
+.hook-banner h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 44px; font-weight: 800; letter-spacing: -1px; margin-bottom: 16px; color: var(--text-main); }
+.hook-banner p { font-size: 18px; color: var(--text-muted); max-width: 900px; line-height: 1.6; }
+
+/* Split View */
+.split-view { display: flex; padding: 0 48px 48px; gap: 40px; align-items: flex-start; }
+
+/* Cards Panel */
+.cards-panel { flex: 1.1; display: flex; flex-direction: column; gap: 24px; }
+.fbap-card { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-sm); padding: 32px; transition: 0.2s; }
+.fbap-card:hover { box-shadow: var(--shadow-md); }
+
+.card-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 12px; color: var(--text-main); letter-spacing: -0.5px; }
+.card-desc { font-size: 16px; color: var(--text-muted); line-height: 1.6; margin-bottom: 24px; }
+
+.card-divider { height: 1px; background: var(--border); margin: 24px 0; }
+.midas-label { font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+
+.feature-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.feature-list li { position: relative; padding-left: 16px; font-size: 15px; font-weight: 600; color: var(--text-main); line-height: 1.4; }
+.feature-list li::before { content: '■'; position: absolute; left: 0; top: 1px; font-size: 10px; }
+.eng-page .feature-list li::before { color: var(--primary); }
+.con-page .feature-list li::before { color: var(--con); }
+
+.card-actions { display: flex; gap: 12px; margin-top: 32px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+.btn-primary { background: var(--primary); color: white; }
+.con-page .btn-primary { background: var(--con); }
+.btn-primary:hover { opacity: 0.9; }
+.btn-secondary { background: var(--surface); border-color: var(--border); color: var(--text-main); box-shadow: var(--shadow-sm); }
+.btn-secondary:hover { background: var(--bg); }
+.btn svg { width: 18px; height: 18px; }
+
+/* Sticky Video Panel */
+.proof-panel { flex: 1; position: sticky; top: 48px; background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-lg); overflow: hidden; display: flex; flex-direction: column; }
+.video-header { padding: 16px 20px; background: #F8FAFC; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 700; color: var(--text-main); display: flex; justify-content: space-between; }
+.video-badge { font-size: 11px; font-weight: 800; background: #E2E8F0; color: #475569; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; }
+.video-container { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; display: flex; align-items: center; justify-content: center; }
+.video-container video { width: 100%; height: 100%; object-fit: cover; }
+.vid-placeholder { position: absolute; color: white; display: flex; flex-direction: column; align-items: center; gap: 12px; font-weight: 600; opacity: 0.5; }
+.vid-placeholder svg { width: 40px; height: 40px; }
+
+/* ── MODALS (Screenshot 2 Style) ── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; }
+.modal-overlay.active { opacity: 1; pointer-events: all; }
+.modal-content { background: var(--surface); width: 90%; max-width: 900px; border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); display: flex; flex-direction: column; transform: scale(0.95); transition: 0.3s; padding: 32px; position: relative; }
+.modal-overlay.active .modal-content { transform: scale(1); }
+.modal-close { position: absolute; top: 24px; right: 24px; width: 32px; height: 32px; background: #F1F5F9; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); border: none; transition: 0.2s; }
+.modal-close:hover { background: #E2E8F0; color: var(--text-main); }
+.modal-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 24px; }
+
+.wizard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.wizard-card { background: #F8FAFC; border: 1px solid var(--border); border-radius: 12px; padding: 24px 16px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.wizard-card svg { width: 32px; height: 32px; color: var(--primary); margin-bottom: 12px; }
+.wizard-card span { font-size: 14px; font-weight: 700; color: var(--text-main); }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── VIDEO MODAL ── */
+.modal-overlay.video-modal .modal-content {
+  padding: 0;
+  overflow: hidden;
+  background: #000;
+  max-width: 960px;
+}
+.vid-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: #0F172A;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.vid-modal-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.2px;
+}
+.vid-modal-badge {
+  font-size: 10px;
+  font-weight: 800;
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.6);
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.vid-modal-close {
+  width: 30px; height: 30px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: rgba(255,255,255,0.7);
+  border: none; transition: 0.2s; flex-shrink: 0;
+}
+.vid-modal-close:hover { background: rgba(255,255,255,0.2); color: #fff; }
+.vid-modal-close svg { width: 16px; height: 16px; }
+#vid-modal-video {
+  width: 100%;
+  display: block;
+  aspect-ratio: 16/9;
+  background: #000;
+  outline: none;
+}
+/* Progress bar on ended */
+.vid-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background: #0F172A;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  min-height: 40px;
+  transition: 0.3s;
+}
+.vid-modal-footer.ended {
+  color: rgba(255,255,255,0.9);
+}
+.vid-close-countdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #60A5FA;
+}
+
+/* ═══════════════════════════════════════════════════
+   iPAD / TOUCH DEVICE FIXES
+   ═══════════════════════════════════════════════════ */
+
+/* 1. Safe area insets for notched iPads (iPad Pro with Face ID) */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* 2. Prevent iOS bounce scroll on body, allow per-element */
+html, body {
+  position: fixed;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 3. All scrollable areas need momentum scrolling on iOS */
+.sidebar,
+.content-area,
+.modal-content {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* 4. Fix position:sticky — doesn't work inside overflow:hidden parents on iOS Safari.
+      The proof-panel uses sticky; its scroll parent (.content-area) must NOT have
+      overflow:hidden. We keep overflow-y:auto only. */
+.content-area {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* 5. proof-panel sticky: on iPad it needs a defined top based on visible viewport */
+.proof-panel {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 24px;
+}
+
+/* 6. aspect-ratio polyfill fallback for older iPadOS (< 15) */
+@supports not (aspect-ratio: 16/9) {
+  .video-container {
+    padding-bottom: 56.25%; /* 16:9 */
+    height: 0;
+    position: relative;
+  }
+  .video-container > * {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  #vid-modal-video {
+    padding-bottom: 56.25%;
+    height: 0;
+    position: relative;
+  }
+}
+
+/* 7. Touch target minimum size (44×44pt per Apple HIG) */
+.btn, .back-btn, .step, .modal-close, .vid-modal-close, .persona-card {
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation; /* disable double-tap zoom on buttons */
+}
+
+/* 8. Fix button active state feedback on iOS (hover doesn't fire on touch) */
+.btn:active { opacity: 0.75; }
+.persona-card:active { transform: scale(0.98); }
+.step:active .step-label { color: var(--text-main); }
+
+/* 9. Video modal full-safe-area on iPad */
+.modal-overlay {
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+}
+
+/* 10. Prevent text size adjustment on orientation change */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* ═══════════════════════════════════════════════════
+   iPAD PORTRAIT / NARROW VIEWPORT  (≤ 1024px wide)
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+
+  /* Home screen: stack cards vertically */
+  .persona-grid {
+    flex-direction: column;
+    max-width: 520px;
+    gap: 20px;
+  }
+  .home-title h1 { font-size: 36px; }
+  .home-title p  { font-size: 17px; }
+  .persona-card  { padding: 28px; }
+  .persona-card h2 { font-size: 22px; }
+  .p-icon { width: 72px; height: 72px; border-radius: 18px; }
+  .p-icon svg { width: 36px; height: 36px; }
+
+  /* Journey layout: sidebar becomes a top tab-bar */
+  .journey-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-shrink: 0;
+    /* keep height to content */
+    height: auto;
+  }
+
+  /* Back button stays above timeline */
+  .back-btn {
+    padding: 0 20px;
+    margin-bottom: 16px;
+    font-size: 14px;
+  }
+
+  /* Timeline → horizontal scrollable tabs */
+  .timeline {
+    flex-direction: row;
+    padding: 0 16px 12px;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .timeline::-webkit-scrollbar { display: none; }
+  .timeline::before { display: none; } /* remove vertical line */
+
+  /* Step becomes a pill button */
+  .step {
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    white-space: nowrap;
+    min-height: unset;
+  }
+  .step.active.eng-step { background: var(--primary-light); border-color: var(--primary); }
+  .step.active.con-step { background: var(--con-light); border-color: var(--con); }
+  .step-dot { width: 20px; height: 20px; }
+  .step-label { font-size: 12px; }
+
+  /* Content area takes remaining height */
+  .content-area {
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* Split view: stack vertically, video on top */
+  .split-view {
+    flex-direction: column-reverse;
+    padding: 0 20px 32px;
+    gap: 24px;
+  }
+
+  /* proof-panel: no longer sticky, just full width */
+  .proof-panel {
+    position: static;
+    width: 100%;
+  }
+
+  /* hook-banner responsive padding */
+  .hook-banner { padding: 28px 20px 20px; }
+  .hook-banner h2 { font-size: 28px; }
+  .hook-banner p  { font-size: 15px; }
+
+  /* Cards full width */
+  .cards-panel { width: 100%; }
+  .fbap-card { padding: 20px; }
+  .card-title { font-size: 19px; }
+
+  /* Buttons: full-width stacked on small screens */
+  .card-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .btn { width: 100%; justify-content: center; padding: 12px 16px; }
+
+  /* Modal: full-screen on iPad portrait */
+  .modal-content {
+    width: 96%;
+    max-height: 88vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Video modal: full width */
+  .modal-overlay.video-modal .modal-content {
+    width: 96%;
+  }
+
+  /* Wizard grid: 2-col on iPad portrait */
+  .wizard-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* Pill text smaller */
+  .pill { font-size: 13px; padding: 6px 12px; }
+}
+
+/* ═══════════════════════════════════════════════════
+   SMALL PHONE  (≤ 480px)
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+  .home-container { padding: 24px 16px; }
+  .home-brand { top: 16px; left: 16px; }
+  .home-title { margin-bottom: 32px; }
+  .home-title h1 { font-size: 28px; }
+  .home-title p { font-size: 15px; }
+  .hook-banner h2 { font-size: 22px; }
+  .wizard-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- PASSWORD SCREEN -->
+<div id="pw-screen" style="
+  position: fixed; inset: 0; z-index: 9999;
+  background: radial-gradient(circle at 50% 40%, #1e3a6e 0%, #0a1628 100%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  font-family: 'Inter', sans-serif;
+  padding: 32px;
+">
+  <div style="margin-bottom: 40px; text-align: center;">
+    <div style="
+      width: 72px; height: 72px; border-radius: 18px;
+      background: rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+      border: 1px solid rgba(255,255,255,0.15);
+    ">
+      <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="1.8">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+      </svg>
+    </div>
+    <div style="font-size: 13px; font-weight: 700; letter-spacing: 0.12em; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-bottom: 10px;">MIDAS Civil NX</div>
+    <h1 style="font-size: 26px; font-weight: 800; color: white; letter-spacing: -0.5px; margin-bottom: 8px;">Enter Password</h1>
+    <p style="font-size: 15px; color: rgba(255,255,255,0.45);">This content is protected.</p>
+  </div>
+
+  <div style="width: 100%; max-width: 360px;">
+    <input
+      id="pw-input"
+      type="password"
+      placeholder="Password"
+      autocomplete="current-password"
+      style="
+        width: 100%; padding: 16px 20px;
+        font-size: 16px; font-weight: 600;
+        background: rgba(255,255,255,0.08);
+        border: 1.5px solid rgba(255,255,255,0.15);
+        border-radius: 12px; color: white;
+        outline: none; margin-bottom: 12px;
+        -webkit-appearance: none;
+        letter-spacing: 0.05em;
+      "
+      onkeydown="if(event.key==='Enter') checkPassword()"
+    />
+    <button
+      onclick="checkPassword()"
+      style="
+        width: 100%; padding: 16px;
+        background: #0055FF; color: white;
+        font-size: 16px; font-weight: 700;
+        border: none; border-radius: 12px;
+        cursor: pointer; transition: opacity 0.2s;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+      "
+      onmousedown="this.style.opacity='0.8'"
+      onmouseup="this.style.opacity='1'"
+    >Continue →</button>
+    <div id="pw-error" style="
+      text-align: center; margin-top: 14px;
+      font-size: 14px; font-weight: 600;
+      color: #FF6B6B; opacity: 0;
+      transition: opacity 0.3s;
+    ">Incorrect password. Please try again.</div>
+  </div>
+</div>
+
+<script>
+function checkPassword() {
+  const input = document.getElementById('pw-input').value;
+  const error = document.getElementById('pw-error');
+  if (input === 'MIDASoft0901') {
+    document.getElementById('pw-screen').style.display = 'none';
+    sessionStorage.setItem('auth', '1');
+  } else {
+    error.style.opacity = '1';
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-input').style.borderColor = '#FF6B6B';
+    setTimeout(() => {
+      error.style.opacity = '0';
+      document.getElementById('pw-input').style.borderColor = 'rgba(255,255,255,0.15)';
+    }, 2500);
+  }
+}
+// 이미 인증된 경우 바로 통과
+if (sessionStorage.getItem('auth') === '1') {
+  document.addEventListener('DOMContentLoaded', () => {
+    const s = document.getElementById('pw-screen');
+    if (s) s.style.display = 'none';
+  });
+}
+</script>
+
+
+<div class="screen active" id="home-screen">
+  <div class="home-container">
+    <div class="home-brand">
+      <img src="./SignatureLogo_v1.7_CIVIL NX.png" alt="MIDAS" onerror="this.style.display='none';document.getElementById('logo-fallback').style.display='flex';">
+      <img src="CVL.png" alt="CVL" style="border-radius:4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);" onerror="this.style.display='none';">
+      <div id="logo-fallback" style="display:none;align-items:center;gap:10px;">
+        <div style="width:36px;height:36px;background:#0055FF;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="1" y="10" width="20" height="3" rx="1.5" fill="white" opacity=".9"/><rect x="5" y="4" width="2.5" height="9" rx="1.25" fill="white"/><rect x="14.5" y="4" width="2.5" height="9" rx="1.25" fill="white"/><path d="M6 5 Q11 1 16 5" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity=".6"/></svg>
+        </div>
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;color:#0055FF;letter-spacing:-0.5px;line-height:1.1;">MIDAS<span style="display:block;font-size:11px;font-weight:600;color:#64748B;letter-spacing:.06em;text-transform:uppercase;">Civil NX</span></div>
+      </div>
+    </div>
+    <div class="home-title">
+      <h1>Select your Workflow</h1>
+      <p>Explore tools, automated workflows, and proofs tailored to your specific role in the bridge lifecycle.</p>
+    </div>
+    <div class="persona-grid">
+      <div class="persona-card eng" onclick="startJourney('eng')">
+        <div class="p-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg></div>
+        <h2>Structural Engineer</h2>
+        <p>Design, load rating, code checking, and retrofitting for permanent bridge structures.</p>
+      </div>
+      <div class="persona-card con" onclick="startJourney('con')">
+        <div class="p-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div>
+        <h2>Contractor / Construction</h2>
+        <p>Value engineering, temporary falsework, erection stability, and specialty structures.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="screen eng-page" id="journey-eng">
+  <div class="journey-layout">
+    
+    <div class="sidebar">
+      <div class="back-btn" onclick="goHome()"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg> Change Persona</div>
+      <div class="timeline">
+        <div class="step eng-step active" onclick="switchTopic('eng', 'modelling')"><div class="step-dot"></div><div class="step-label">1. Parametric Modelling</div></div>
+        <div class="step eng-step" onclick="switchTopic('eng', 'loads')"><div class="step-dot"></div><div class="step-label">2. Live Load Generation</div></div>
+        <div class="step eng-step" onclick="switchTopic('eng', 'code')"><div class="step-dot"></div><div class="step-label">3. Code Checking</div></div>
+        <div class="step eng-step" onclick="switchTopic('eng', 'staged')"><div class="step-dot"></div><div class="step-label">4. Staged Construction</div></div>
+        <div class="step eng-step" onclick="switchTopic('eng', 'dynamic')"><div class="step-dot"></div><div class="step-label">5. Dynamics & Fatigue</div></div>
+        <div class="step eng-step" onclick="switchTopic('eng', 'results')"><div class="step-dot"></div><div class="step-label">6. Concurrent Effects</div></div>
+      </div>
+    </div>
+
+    <div class="content-area">
+      
+      <div class="topic-section active" id="eng-modelling">
+        <div class="hook-banner">
+          <div class="hook-pills">
+            <span class="pill">&lt; 1 Min Generation</span>
+            <span class="pill">8 Built-in Wizards</span>
+            <span class="pill">Any Custom Section</span>
+          </div>
+          <h2>Build Any Bridge in Minutes.</h2>
+          <p>Don't spend days modeling plates and nodes. Move from simple alignment definition to complex 3D assembly instantly. Adjust a span or skew, and watch the model regenerate in seconds.</p>
+        </div>
+        <div class="split-view">
+          <div class="cards-panel">
+            
+            <div class="fbap-card">
+              <h3 class="card-title">Parametric Bridge Wizards</h3>
+              <p class="card-desc">Eliminate manual element modelling. Input your alignment and girder spacing parameters, and let MIDAS handle the complex 3D assembly automatically.</p>
+              <div class="card-divider"></div>
+              <div class="midas-label">MIDAS FEATURES</div>
+              <ul class="feature-list">
+                <li>8 Dedicated Wizards (Steel Composite, PSC, Truss, Arch, Cable-Stayed, etc.)</li>
+                <li>Parametric definition of span, skew, and bracing assignments</li>
+                <li>Automated generation of boundary conditions and sub-structures</li>
+                <li>Automated Composite Behavior (Short/Long term transformed properties)</li>
+              </ul>
+              <div class="card-actions">
+                <button class="btn btn-primary" onclick="openVideoModal('steel composite Wizard.mp4', 'Steel Composite Design')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Watch Video</button>
+                <button class="btn btn-secondary" onclick="openModal('modal-8wizards')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg> View 8 Wizards</button>
+              </div>
+            </div>
+
+            <div class="fbap-card">
+              <h3 class="card-title">In-Built Truss Modelling</h3>
+              <p class="card-desc">Instantly map truss nodes, chords, and diagonals for quick analysis of truss bridges.</p>
+              <div class="card-divider"></div>
+              <div class="midas-label">MIDAS FEATURES</div>
+              <ul class="feature-list">
+                <li>Pre-defined library of standard truss configurations (Warren, Pratt, etc.)</li>
+                <li>Automated structural end-release applications</li>
+                <li>Concurrent forces extraction at joints, avoid over-design</li>
+                <li>Design all steel members as per latest AASHTO Design Standards</li>
+              </ul>
+              <div class="card-actions">
+                <button class="btn btn-primary" onclick="openVideoModal('3. Steel Truss Bridge Design (10th Edition).mp4', 'Steel Truss Design')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Watch Video</button>
+              </div>
+            </div>
+
+            <div class="fbap-card">
+              <h3 class="card-title">Section Property Calculator (SPC)</h3>
+              <p class="card-desc">Import any Microstation/AutoCAD cross-section files. Warping constant, shear center, and torsional stiffness are computed instantly, composite sections or noncomposite sections</p>
+              <div class="card-divider"></div>
+              <div class="midas-label">MIDAS FEATURES</div>
+              <ul class="feature-list">
+                <li>Direct DXF import to section mapping</li>
+                <li>Exact Properties calculated as drawn</li>
+              </ul>
+              <div class="card-actions">
+                <button class="btn btn-secondary" onclick="openModal('modal-spc')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> View SPC Interface</button>
+              </div>
+            </div>
+
+          </div>
+          
+        </div>
+      </div>
+
+      <div class="topic-section" id="eng-loads">
+        <div class="hook-banner">
+          <div class="hook-pills">
+            <span class="pill">All 50 State Vehicles</span>
+            <span class="pill">Auto Placement</span>
+            <span class="pill">Live Load Optimization</span>
+          </div>
+          <h2>Every Vehicle. Every Lane. Automated.</h2>
+          <p>Define carriageway geometry and MIDAS auto-generates lane arrangements per AASHTO LRFD/LRFR, LFD/LFR finding the absolute worst-case position across all simultaneous lanes in a single run.</p>
+        </div>
+        <div class="split-view">
+          <div class="cards-panel">
+            <div class="fbap-card">
+              <h3 class="card-title">Moving Load Optimization</h3>
+              <p class="card-desc">Stop guessing critical load positions. MIDAS identifies critical placement locations directly and traces the worst-case path automatically based on influence surfaces.</p>
+              <div class="card-divider"></div>
+              <div class="midas-label">MIDAS FEATURES</div>
+              <ul class="feature-list">
+                <li>Live Load Generator with built-in HL-93, Emergency Vehicles, and State-specific legal & permit vehicles</li>
+                <li>Influence Line Analysis & Influence Surface Analysis</li>
+                <li>Concurrent force extraction based on exact vehicle position</li>
+              </ul>
+              <div class="card-actions">
+                <button class="btn btn-primary" onclick="openVideoModal('Moving Load.mp4', 'Live Load Generation')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Watch Video</button>
+              </div>
+            </div>
+            
+          </div>
+
+        </div>
+      </div>
+
+      <div class="topic-section" id="eng-code">
+        <div class="hook-banner">
+          <div class="hook-pills">
+            <span class="pill">10+ Code Editions</span>
+            <span class="pill">Design + Rating Integrated</span>
+          </div>
+          <h2>Current to Legacy, Fully Automated.</h2>
+          <p>Clause-referenced checks with full intermediate values. Every check links to the governing formula for total transparency, outputting submission-ready Excel reports.</p>
+        </div>
+        <div class="split-view">
+          <div class="cards-panel">
+            <div class="fbap-card">
+              <h3 class="card-title">Design Checks & Excel Export</h3>
+              <p class="card-desc">Ensure zero black-box results. Traceable equations allow you to review exactly how a capacity ratio is determined for Strength, Service, and Fatigue limit states and trace back what goes into each formula.</p>
+              <div class="card-divider"></div>
+              <div class="midas-label">MIDAS FEATURES</div>
+              <ul class="feature-list">
+                <li>AASHTO LRFD/LFD/ASD Code Checking</li>
+                <li>Get Capacity Ratios and Optimize</li>
+                <li>One-click automated Excel calculation report generation</li>
+              </ul>
+              <div class="card-actions">
+                <button class="btn btn-primary" onclick="openVideoModal('1. Steel Composite Design (10th Edition).mp4', 'Code Checking & Excel Export')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Watch Video</button>
+              </div>
+            </div>
+            <div class="fbap-card">
+              <h3 class="card-title">Rating Checks & Excel Report For Each Vehicle</h3>
+              <p class="card-desc">Rate the bridge for inventory, legal, and permit vehicles seamlessly in the same environment.</p>
+              <div class="card-divider"></div>
+              <div class="midas-label">MIDAS FEATURES</div>
+              <ul class="feature-list">
+                <li>LRFR Rating (2nd & 3rd Editions) integrated</li>
+                <li>Automated Inventory, Operating, & Permit rating factors</li>
+              </ul>
+              <div class="card-actions">
+                <button class="btn btn-primary" onclick="openVideoModal('2. Steel Composite Rating (10th Edition).mp4', 'LRFR Load Rating')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Watch Video</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="topic-section" id="eng-staged">
+        <div class="hook-banner">
+          <div class="hook-pills">
+            <span class="pill">Locked-In Stresses Tracked</span>
+            <span class="pill">Auto Camber Diagrams</span>
+            <span class="pill">3 Time-Dependent Methods</span>
+          </div>
+          <h2>Build It the Way You Build It.</h2>
+          <p>Model every erection step, every deck pour, and every prop removal. MIDAS captures locked-in stresses, tracks actual stiffness, and generates camber tables automatically.</p>
+        </div>
+        <div class="split-view">
+          <div class="cards-panel">
+            <div class="fbap-card">
+              <h3 class="card-title">Part-Width & Deck Replacement</h3>
+              <p class="card-desc">Rehab projects require precise tracking of dead load distribution. Ensure stability when only half the deck is poured and map asymmetric lane closures accurately.</p>
+              <div class="card-divider"></div>
+              <div class="midas-label">MIDAS FEATURES</div>
+              <ul class="feature-list">
+                <li>Construction Stage Manager (Activate/Deactivate elements and loads)</li>
+                <li>Reverse Dead-Load Analysis (Automated Camber & 10th-point tables)</li>
+                <li>Creep & Shrinkage computation (AASHTO, CEB-FIP, CSA built-in)</li>
+              </ul>
+              <div class="card-actions">
+                <button class="btn btn-primary" onclick="openVideoModal('DR.mp4', 'Part Width Deck Replacement')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Watch Video</button>
+              </div>
+            </div>
+            <div class="fbap-card">
+              <h3 class="card-title">Push Launching of Girders</h3>
+              <p class="card-desc">Automate the complex moving boundary conditions of launching to ensure temporary nose stresses and pier reactions never exceed capacity.</p>
+              <div class="card-divider"></div>
+              <div class="midas-label">MIDAS FEATURES</div>
+              <ul class="feature-list">
+                <li>Pier reaction tracking at every incremental push</li>
+                <li>Nose beam stress verification</li>
+                <li>Sliding pad force calculations</li>
+              </ul>
+              <div class="card-actions">
+                <button class="btn btn-primary" onclick="openVideoModal('ILM.mp4', 'Incremental Launching')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Watch Video</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="topic-section" id="eng-dynamic">
+        <div class="hook-banner">
+          <div class="hook-pills">
+            <span class="pill">RSA + THA Integrated</span>
+            <span class="pill">Eigenvalue Buckling</span>
+            <span class="pill">Real Walk/Jog Time-Histories</span>
+          </div>
+          <h2>Advanced Dynamics Made Simple.</h2>
+          <p>Comprehensive dynamic capability in one environment—from eigenvalue buckling analysis during unbraced erection, to pedestrian comfort checks.</p>
+        </div>
+        <div class="split-view">
+          <div class="cards-panel">
+            <div class="fbap-card">
+              <h3 class="card-title">Pedestrian Vibration & Stability</h3>
+              <p class="card-desc">Apply real walking, jogging, and crowd loads as actual time-histories. Verify acceleration against human comfort criteria for slender footbridges directly.</p>
+              <div class="card-divider"></div>
+              <div class="midas-label">MIDAS FEATURES</div>
+              <ul class="feature-list">
+                <li>Time-History Analysis (Linear & Nonlinear)</li>
+                <li>Eigenvalue Buckling Analysis (Critical load multipliers at any stage)</li>
+              </ul>
+              <div class="card-actions">
+                <button class="btn btn-primary" onclick="openVideoModal('Pedestrian Bridge.mp4', 'Pedestrian Time History')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Watch Video</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="topic-section" id="eng-results">
+        <div class="hook-banner">
+          <div class="hook-pills">
+            <span class="pill">Exact Concurrent Forces</span>
+          </div>
+          <h2>Concurrent Forces. Not Max Envelopes.</h2>
+          <p>Stop over-designing connections with maximum envelope values. Extract concurrent axial, shear, and moment forces exactly when and where they occur.</p>
+        </div>
+        <div class="split-view">
+          <div class="cards-panel">
+            <div class="fbap-card">
+              <h3 class="card-title">Pinpoint Accuracy for Connections</h3>
+              <p class="card-desc">Pull exact forces at specific stages. View color-coded maps to identify under-designed or over-designed sections instantly.</p>
+              <div class="card-divider"></div>
+              <div class="midas-label">MIDAS FEATURES</div>
+              <ul class="feature-list">
+                <li>Concurrent Force Extraction tables</li>
+                <li>Stress Contour Mapping (Von Mises, Principal, Membrane)</li>
+              </ul>
+              <div class="card-actions">
+                <button class="btn btn-primary" onclick="openVideoModal('concurrent forces.mp4', 'Result Contour & Concurrent Forces')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Watch Video</button>
+                <button class="btn btn-secondary" onclick="openModal('modal-concurr')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> View Element-Wise Concurrent Forces</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="screen con-page" id="journey-con">
+  <div class="journey-layout">
+    
+    <div class="sidebar">
+      <div class="back-btn" onclick="goHome()"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg> Change Persona</div>
+      <div class="timeline">
+        <div class="step con-step active" onclick="switchTopic('con', 've')"><div class="step-dot"></div><div class="step-label">1. Value Engineering</div></div>
+        <div class="step con-step" onclick="switchTopic('con', 'erection')"><div class="step-dot"></div><div class="step-label">2. Erection & Stability</div></div>
+        <div class="step con-step" onclick="switchTopic('con', 'temp')"><div class="step-dot"></div><div class="step-label">3. Temporary Works</div></div>
+        <div class="step con-step" onclick="switchTopic('con', 'ped')"><div class="step-dot"></div><div class="step-label">4. Simple to Specialty Structures</div></div>
+      </div>
+    </div>
+
+    <div class="content-area">
+    
+      <div class="topic-section active" id="con-ve">
+        <div class="hook-banner">
+          <div class="hook-pills">
+            <span class="pill">VE Alternate in &lt; 1 Day</span>
+            <span class="pill">Quantify Steel Savings Before Bid</span>
+            <span class="pill">No Separate FEA Consultant Needed</span>
+          </div>
+          <h2>Prove the Alternate. Win the Bid.</h2>
+          <p>The consultant's design says 5 girders. Prove you can do it with 4. Generate alternate models in minutes, design & optimize, and evaluate quantity reduction.</p>
+        </div>
+        <div class="split-view">
+          <div class="cards-panel">
+
+            <div class="fbap-card">
+              <h3 class="card-title">Rapid Parametric Re-Modeling</h3>
+              <p class="card-desc">Change girder count, spacing, span, or bridge type and the full 3D model regenerates in seconds — including composite behavior, boundary conditions, and load generation. Pivot from plate girders to a truss scheme and verify LRFD compliance without rebuilding.</p>
+              <div class="card-divider"></div>
+              <div class="midas-label">MIDAS FEATURES</div>
+              <ul class="feature-list">
+                <li>Parametric girder count, spacing &amp; skew control</li>
+                <li>Steel Truss alternate (Warren, Pratt, Through-Truss)</li>
+                <li>SPC — cheaper built-up section → auto torsion &amp; shear center</li>
+                <li>Utilization color maps (identify material savings instantly)</li>
+              </ul>
+              <div class="card-actions">
+                <button class="btn btn-primary" onclick="openVideoModal('3. Steel Truss Bridge Design (10th Edition).mp4', 'Truss Scheme Alternate')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Watch Video</button>
+              </div>
+            </div>
+
+            <div class="fbap-card">
+              <h3 class="card-title">Load Rating for VE Justification</h3>
+              <p class="card-desc">If the owner or EOR requires a rating factor alongside your VE alternate, LRFR runs in the same model. Prove the alternate not only passes design but also achieves the required rating level.</p>
+              <div class="card-divider"></div>
+              <div class="midas-label">MIDAS FEATURES</div>
+              <ul class="feature-list">
+                <li>LRFR Design, Legal &amp; Permit rating in same model</li>
+                <li>RF output quantifies load posting impact</li>
+                <li>Steel Weight Ratio Comparison Report</li>
+              </ul>
+              <div class="card-actions">
+                <button class="btn btn-primary" onclick="openVideoModal('2. Steel Composite Rating (10th Edition).mp4', 'LRFR Load Rating for VE')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Watch Video</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="topic-section" id="con-erection">
+        <div class="hook-banner">
+          <div class="hook-pills">
+            <span class="pill">Stage-by-Stage Tracking</span>
+            <span class="pill">Critical Load Multipliers</span>
+          </div>
+          <h2>Prove the Sequence Won't Fail.</h2>
+          <p>Steel hanging from a crane. Wet deck on unbraced girders. Prove to the EOR that your construction sequence won't buckle the permanent structure.</p>
+        </div>
+        <div class="split-view">
+          <div class="cards-panel">
+            <div class="fbap-card">
+              <h3 class="card-title">Deflection & Buckling Tracking</h3>
+              <p class="card-desc">Visualize exact deformation states at every individual lifting and pouring sequence to ensure spans align properly during closure.</p>
+              <div class="card-divider"></div>
+              <div class="midas-label">MIDAS FEATURES</div>
+              <ul class="feature-list">
+                <li>Construction Stage Analysis tracking locked-in stress</li>
+                <li>Eigenvalue Buckling Analysis for temporary conditions</li>
+              </ul>
+              <div class="card-actions">
+                <button class="btn btn-primary" onclick="openVideoModal('8. Construction Stage Analysis - Steel bridge Erection sequence (Checking deflections by stage).mp4', 'Erection Sequence Deflections')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Watch Video</button>
+                <button class="btn btn-secondary" onclick="openModal('modal-buckling')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> Buckling Checks for Stability</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="topic-section" id="con-temp">
+        <div class="hook-banner">
+          <div class="hook-pills">
+            <span class="pill">Same Unified Model</span>
+            <span class="pill">Auto SPMT Placement</span>
+            <span class="pill">Borelog → Soil Springs</span>
+          </div>
+          <h2>Design What Gets Ripped Out.</h2>
+          <p>Design falsework towers, temporary haul bridges, and SPMT loadings inside the exact same model used for the permanent structure.</p>
+        </div>
+        <div class="split-view">
+          <div class="cards-panel">
+            <div class="fbap-card">
+              <h3 class="card-title">Integrated Falsework & Shoring</h3>
+              <p class="card-desc">Build temporary props directly underneath the main bridge model. As concrete is poured virtually, exact load transfer into the towers is calculated.</p>
+              <div class="card-divider"></div>
+              <div class="midas-label">MIDAS FEATURES</div>
+              <ul class="feature-list">
+                <li>Integrated Shoring Models linked to permanent structures</li>
+                <li>SPMT Moving Load Optimization (Auto-finds worst-case placement)</li>
+              </ul>
+              <div class="card-actions">
+                <button class="btn btn-primary" onclick="openVideoModal('Temporary Falseworks.mp4', 'Falsework & Shoring Models')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Watch Video</button>
+              </div>
+            </div>
+            <div class="fbap-card">
+              <h3 class="card-title">Automated Foundation Soil Springs</h3>
+              <p class="card-desc">Input Standard Penetration Test (SPT) data to automatically generate non-linear soil springs for temporary crane pads or foundations.</p>
+              <div class="card-divider"></div>
+              <div class="midas-label">MIDAS FEATURES</div>
+              <ul class="feature-list">
+                <li>Borelog to Soil Springs converter</li>
+                <li>Non-linear soil spring application</li>
+              </ul>
+              <div class="card-actions">
+                <button class="btn btn-primary" onclick="openVideoModal('11. Foundation design - Soil Springs.mp4', 'Soil Spring Generation')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Watch Video</button>
+                <button class="btn btn-secondary" onclick="openModal('modal-ssi')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> View Soil Spring Generator</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="topic-section" id="con-ped">
+        <div class="hook-banner">
+          <div class="hook-pills">
+            <span class="pill">Time-History Real Loads</span>
+            <span class="pill">3D → Beam Force Extraction</span>
+          </div>
+        <h2>Model It Once. Run the Checks Directly. </h2>
+          <p>Modular pedestrian bridges, Fink trusses, custom lifting frames, and turnbuckle bracing - modelled as built without simplifying the geometry to fit a standard template.</p>
+        </div>
+        <div class="split-view">
+          <div class="cards-panel">
+            <div class="fbap-card">
+              <h3 class="card-title">Custom Geometry & Truss Modelling</h3>
+              <p class="card-desc">Fink trusses, pin connections, and custom lifting frame configurations are modeled directly as frame or plate elements. Skewed, curved, and non-prismatic members are defined as-is — no need to approximate to a prismatic section or standard configuration.</p>
+              <div class="card-divider"></div>
+              <div class="midas-label">MIDAS FEATURES</div>
+              <ul class="feature-list">
+                <li>Truss and frame element modeling (Fink, Warren, Pratt configurations)</li>
+                <li>Skewed, curved, and non-prismatic section support</li>
+                <li>Custom lifting frame and temporary support modelling</li>
+                <li>Turnbuckle bracing as tension-only members with pretension assignment</li>
+                <li>Section property calculator for non-standard shapes</li>
+              </ul>
+              <div class="card-actions">
+                <button class="btn btn-primary" onclick="openVideoModal('Pedestrian Bridge.mp4', 'Pedestrian Time History')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Watch Video</button>
+                <button class="btn btn-secondary" onclick="openModal('modal-arch')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> View Network-Tied Arch Bridge</button>
+              </div>
+            </div>
+
+            <div class="fbap-card">
+              <h3 class="card-title">Virtual Beam - Plate Model to Code Check</h3>
+              <p class="card-desc">Steel plate girder and diaphragm assemblies can be modeled as 3D plate elements. Virtual Beams extract the resultant axial, shear, and moment demands from those plate assemblies so AASHTO LRFD or AISC member checks can be run directly — without building a separate line model for code compliance.</p>
+              <div class="card-divider"></div>
+              <div class="midas-label">MIDAS FEATURES</div>
+              <ul class="feature-list">
+                <li>Virtual Beams — resultant force extraction from plate assemblies</li>
+                <li>Construction stage analysis (erection sequence, falsework, deck casting)</li>
+                <li>Creep and shrinkage time-dependent analysis for PSC</li>
+                <li>AASHTO LRFD and AISC code check integration</li>
+                <li>Moving load analysis with influence line generation</li>
+                <li>Pre- and post-tensioning with tendon profile definition</li>
+              </ul>
+              <div class="card-actions">
+                <button class="btn btn-secondary" onclick="openModal('modal-plate')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> View Virtual Beam Design</button>
+              </div>
+            </div>
+
+            <div class="fbap-card">
+              <h3 class="card-title">Cable-Stayed &amp; Suspension Analysis + Pedestrian Vibration</h3>
+              <p class="card-desc">Dedicated wizards for cable-stayed and suspension bridge configuration. Cable Force Tuning adjusts pretensions in real time via influence matrix — no full re-run required per iteration. Forward and Backward Construction Stage Analysis handles erection control sequences. Walking, jogging, and crowd time-history loads applied directly; acceleration response checked against comfort limit states.</p>
+              <div class="card-divider"></div>
+              <div class="midas-label">MIDAS FEATURES</div>
+              <ul class="feature-list">
+                <li>Cable-Stayed Bridge Wizard + Suspension Bridge Wizard</li>
+                <li>Cable Force Tuning via influence matrix (real-time, no re-run)</li>
+                <li>Forward &amp; Backward Construction Stage Analysis for erection control</li>
+                <li>Geometric nonlinear analysis — large displacement cable behavior</li>
+                <li>Form-finding for stress-free cable geometry</li>
+                <li>Pedestrian time-history analysis (walk / jog / crowd input profiles)</li>
+                <li>Acceleration vs. comfort limit state check</li>
+                <li>Virtual Beams — plate joint geometry to beam code checks</li>
+              </ul>
+              <div class="card-actions">
+                <button class="btn btn-secondary" onclick="openModal('modal-cables')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> View Cable Bridges</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-8wizards">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal('modal-8wizards')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    <div class="modal-title">8 Built-In Bridge Wizards</div>
+    <div class="wizard-grid">
+      <div class="wizard-card"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg><span>Steel Composite</span></div>
+      <div class="wizard-card"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg><span>PSC Composite</span></div>
+      <div class="wizard-card"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"/></svg><span>Steel Truss</span></div>
+      <div class="wizard-card"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg><span>Arch</span></div>
+      <div class="wizard-card"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg><span>Pedestrian</span></div>
+      <div class="wizard-card"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg><span>Segmental (FCM)</span></div>
+      <div class="wizard-card"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><span>Cable-Stayed</span></div>
+      <div class="wizard-card"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/></svg><span>Suspension</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-spc">
+  <div class="modal-content" style="align-items: center; text-align: center;">
+    <button class="modal-close" onclick="closeModal('modal-spc')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    <div class="modal-title" style="margin-bottom: 8px;">Section Property Calculator</div>
+    <p style="color: var(--text-muted); margin-bottom: 32px;">Import any DXF to calculate Warping Constants and Torsional Stiffness instantly.</p>
+    <div style="display:grid;grid-template-columns:1fr 1.6fr;gap:12px;width:100%;text-align:left;">
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;">
+        <div style="font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Computed Properties</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:6px;">
+          <li style="font-size:13px;color:var(--text-main);font-weight:500;">✓ Warping Constant (C<sub>w</sub>)</li>
+          <li style="font-size:13px;color:var(--text-main);font-weight:500;">✓ Torsional Stiffness (J)</li>
+          <li style="font-size:13px;color:var(--text-main);font-weight:500;">✓ Shear Center Location</li>
+          <li style="font-size:13px;color:var(--text-main);font-weight:500;">✓ Short &amp; Long-term I<sub>eff</sub></li>
+        </ul>
+      </div>
+      <div style="border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;min-height:180px;">
+        <img src="SPC.png" alt="Section Property Calculator Interface" style="width:100%;height:100%;object-fit:cover;display:block;">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-concurr">
+  <div class="modal-content" style="align-items: center; text-align: center;">
+    <button class="modal-close" onclick="closeModal('modal-concurr')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    <div class="modal-title" style="margin-bottom: 8px;">Concurrent Force Results Table</div>
+    <div style="display:block;width:75%;">
+      <img src="Concurrent Forces.png" alt="Concurrent Force Results Table" style="width:100%;height:100%;object-fit:cover;display:block;">
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-buckling">
+  <div class="modal-content" style="align-items: center; text-align: center;">
+    <button class="modal-close" onclick="closeModal('modal-buckling')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    <div class="modal-title" style="margin-bottom: 8px;">Stability Checks</div>
+    <div style="display:block;width:100%;">
+      <img src="buckling.png" alt="Stability Checks" style="width:100%;height:100%;object-fit:cover;display:block;">
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-ssi">
+  <div class="modal-content" style="align-items: center; text-align: center;">
+    <button class="modal-close" onclick="closeModal('modal-ssi')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    <div class="modal-title" style="margin-bottom: 8px;">Soil Spring Generator</div>
+    <div style="display:block;width:100%;">
+      <img src="SSI.png" alt="Soil Spring Generator" style="width:100%;height:100%;object-fit:cover;display:block;">
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-plate">
+  <div class="modal-content" style="align-items: center; text-align: center;">
+    <button class="modal-close" onclick="closeModal('modal-plate')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    <div class="modal-title" style="margin-bottom: 8px;">Virtual Beam Design</div>
+    <div style="display:block;width:100%;">
+      <img src="plate.png" alt="Virtual Beam Design" style="width:80%;height:100%;object-fit:cover;display:block;">
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-cables">
+  <div class="modal-content" style="align-items: center; text-align: center;">
+    <button class="modal-close" onclick="closeModal('modal-cables')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    <div class="modal-title" style="margin-bottom: 8px;">Cable Stayed Bridges</div>
+    <div style="display:block;width:100%;">
+      <img src="cable bridge.png" alt="Cable Bridges" style="width:30%;height:30%;object-fit:cover;display:block;margin:0 auto;">
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-arch">
+  <div class="modal-content" style="align-items: center; text-align: center;">
+    <button class="modal-close" onclick="closeModal('modal-arch')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    <div class="modal-title" style="margin-bottom: 8px;">Network-Tied Arch Bridge</div>
+    <div style="display:block;width:100%;">
+      <img src="arch.png" alt="Arch Bridges" style="width:100%;height:100%;object-fit:cover;display:block;">
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay video-modal" id="modal-video">
+  <div class="modal-content">
+    <div class="vid-modal-header">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="vid-modal-title" id="vid-modal-title">Video</span>
+        <span class="vid-modal-badge">In-Software Demo</span>
+      </div>
+      <button class="vid-modal-close" onclick="closeVideoModal()"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+    <video id="vid-modal-video" controls playsinline webkit-playsinline x-webkit-airplay="allow"></video>
+    <div class="vid-modal-footer" id="vid-modal-footer">
+      <span id="vid-modal-footer-text">Use controls to pause or seek</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// --- Initialization ---
+const DOM = {
+  home: document.getElementById('home-screen'),
+  journeyEng: document.getElementById('journey-eng'),
+  journeyCon: document.getElementById('journey-con')
+};
+
+let activePersona = 'eng';
+
+// Player HTML injected into every proof-panel (kept for layout structure)
+const playerHTML = `
+  <div class="video-header">
+    <span class="vid-title">Select a feature to view</span>
+    <span class="video-badge">In-Software Video</span>
+  </div>
+  <div class="video-container">
+    <div class="vid-placeholder">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span>Awaiting Selection...</span>
+    </div>
+  </div>
+`;
+
+document.querySelectorAll('.proof-panel').forEach(panel => {
+  panel.innerHTML = playerHTML;
+});
+
+// --- Navigation ---
+
+function startJourney(persona) {
+  activePersona = persona;
+  DOM.home.classList.remove('active');
+  if (persona === 'eng') {
+    DOM.journeyEng.classList.add('active');
+    switchTopicDirect('eng', 'modelling');
+  } else {
+    DOM.journeyCon.classList.add('active');
+    switchTopicDirect('con', 've');
+  }
+}
+
+function goHome() {
+  closeVideoModal();
+  DOM.journeyEng.classList.remove('active');
+  DOM.journeyCon.classList.remove('active');
+  DOM.home.classList.add('active');
+}
+
+function switchTopic(persona, topicId) {
+  const clickedStep = event && event.currentTarget ? event.currentTarget : null;
+  switchTopicDirect(persona, topicId, clickedStep);
+}
+
+function switchTopicDirect(persona, topicId, clickedStep) {
+  const journeyScreen = document.getElementById('journey-' + persona);
+
+  journeyScreen.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  if (clickedStep) {
+    clickedStep.classList.add('active');
+  } else {
+    journeyScreen.querySelectorAll('.step').forEach(s => {
+      if (s.getAttribute('onclick') && s.getAttribute('onclick').includes("'" + topicId + "'")) {
+        s.classList.add('active');
+      }
+    });
+  }
+
+  journeyScreen.querySelectorAll('.topic-section').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(persona + '-' + topicId);
+  if (target) target.classList.add('active');
+}
+
+// --- Video Modal ---
+const vidModal     = document.getElementById('modal-video');
+const vidEl        = document.getElementById('vid-modal-video');
+const vidTitle     = document.getElementById('vid-modal-title');
+const vidFooter    = document.getElementById('vid-modal-footer');
+const vidFooterTxt = document.getElementById('vid-modal-footer-text');
+
+let countdownTimer = null;
+
+function openVideoModal(src, title, speed = 2) {
+  // Reset any previous countdown
+  clearCountdown();
+  vidFooter.classList.remove('ended');
+  vidFooterTxt.innerHTML = 'Use controls to pause or seek';
+
+  vidTitle.textContent = title;
+  vidEl.src = src;
+  vidEl.load();
+  vidEl.playbackRate = speed;
+  vidModal.classList.add('active');
+  // iPad/iOS: autoplay requires user gesture; .play() returns a promise
+  const playPromise = vidEl.play();
+  if (playPromise !== undefined) {
+    playPromise.catch(() => {
+      // Autoplay blocked – show a tap-to-play overlay
+      vidEl.controls = true; // ensure controls visible so user can tap
+    });
+  }
+}
+
+function closeVideoModal() {
+  clearCountdown();
+  vidModal.classList.remove('active');
+  vidEl.pause();
+  vidEl.src = '';
+  vidFooter.classList.remove('ended');
+  vidFooterTxt.innerHTML = 'Use controls to pause or seek';
+}
+
+function clearCountdown() {
+  if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+}
+
+// Auto-close 3 seconds after the video ends
+vidEl.addEventListener('ended', () => {
+  let remaining = 3;
+  vidFooter.classList.add('ended');
+  vidFooterTxt.innerHTML = `Video complete &mdash; <span class="vid-close-countdown">closing in ${remaining}s</span>`;
+
+  countdownTimer = setInterval(() => {
+    remaining--;
+    if (remaining <= 0) {
+      clearCountdown();
+      closeVideoModal();
+    } else {
+      vidFooterTxt.innerHTML = `Video complete &mdash; <span class="vid-close-countdown">closing in ${remaining}s</span>`;
+    }
+  }, 1000);
+});
+
+// --- Modals ---
+function openModal(id) {
+  document.getElementById(id).classList.add('active');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+// Click backdrop to close any modal
+window.onclick = function(e) {
+  if (e.target.classList.contains('modal-overlay')) {
+    if (e.target.id === 'modal-video') {
+      closeVideoModal();
+    } else {
+      e.target.classList.remove('active');
+    }
+  }
+};
+</script>
+</body>
+</html>
